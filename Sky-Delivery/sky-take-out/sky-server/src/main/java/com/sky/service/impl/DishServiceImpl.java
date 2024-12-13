@@ -96,11 +96,17 @@ public class DishServiceImpl implements DishService {
             }
         }
 
-        for (Long id : ids) {
+        // 以下循环删除存在效率问题，可以采用批量删除的方式优化
+        /*for (Long id : ids) {
             // 删除菜品数据
             dishMapper.deleteById(id);
             // 将其关联的口味数据删除
             dishFlavorMapper.deleteByDishId(id);
-        }
+        }*/
+
+        // 根据菜品id批量删除菜品
+        dishMapper.deleteByIds(ids);
+        // 批量删除关联的口味数据
+        dishFlavorMapper.deleteByDishIds(ids);
     }
 }
