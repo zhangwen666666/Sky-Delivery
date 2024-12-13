@@ -37,3 +37,8 @@ sky:
     admin-ttl: 7200000000
     # 设置前端传递过来的令牌名称
     admin-token-name: token
+  hwobs:
+    access-key-id: ${sky.hwobs.access-key-id}
+    access-key-secret: ${sky.hwobs.access-key-secret}
+    endpoint: ${sky.hwobs.endpoint}
+    bucket-name: ${sky.hwobs.bucket-name}
