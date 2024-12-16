@@ -166,4 +166,15 @@ public class DishServiceImpl implements DishService {
     public List<Dish> getAllByCategoryId(Long categoryId) {
         return dishMapper.selectAllByCategoryId(categoryId);
     }
+
+
+    /**
+     * 修改菜品起售停售
+     * @param id
+     * @param status
+     */
+    @Override
+    public void modifyStatus(Long id, Integer status) {
+        dishMapper.update(Dish.builder().id(id).status(status).build());
+    }
 }
