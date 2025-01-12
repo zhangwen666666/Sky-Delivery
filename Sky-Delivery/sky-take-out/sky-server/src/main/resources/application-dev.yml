@@ -11,3 +11,8 @@ sky:
     access-key-secret: 5wjwYKuxSu9sCyVgBsc1S0Cqgl8ncvx7qEYRMnMg
     endpoint: obs.cn-north-4.myhuaweicloud.com
     bucket-name: sky-take-out-2dae
+  redis:
+    host: 111.119.211.126
+    port: 6379
+    password: 1234
+    database: 0
