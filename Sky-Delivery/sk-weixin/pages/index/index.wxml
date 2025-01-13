@@ -1,0 +1,22 @@
+<!--index.wxml-->
+<!-- navigation-bar用于设置导航栏信息 -->
+<navigation-bar title="苍穹外卖" back="{{false}}" color="black" background="#FFF"></navigation-bar>
+<scroll-view class="scrollarea" scroll-y type="list">
+  <view class="container">
+    <!-- view标签相当于div标签 -->
+    <view>
+      <!-- {{}}类似于vue的插值语法，这里的变量msg是动态的，需要在index.js文件中定义 -->
+      {{msg}}
+    </view>
+
+    <view>
+      <!-- 
+        定义一个按钮，type共有三种类型：primary、default、warn
+        通过bindtap="函数名"绑定事件，
+      -->
+      <button bindtap="getUserInfo" type="primary">获取用户信息</button>
+      昵称：{{nikeName}}
+      <image style="width: 100px; height: 100px;" src="{{url}}"></image>
+    </view>
+  </view>
+</scroll-view>
