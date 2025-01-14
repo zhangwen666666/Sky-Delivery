@@ -18,15 +18,18 @@ import com.sky.vo.DishVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
 public class DishServiceImpl implements DishService {
+    public static final String PREFIX = "dish_";
 
     @Autowired
     private DishMapper dishMapper;
@@ -36,6 +39,9 @@ public class DishServiceImpl implements DishService {
 
     @Autowired
     private SetmealDishMapper setmealDishMapper;
+
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
     /**
      * 新增菜品和对应的口味
@@ -50,6 +56,8 @@ public class DishServiceImpl implements DishService {
         // 向菜品表插入一条数据
         Dish dish = new Dish();
         BeanUtils.copyProperties(dishDTO, dish);
+        // 默认新插入的菜品是起售状态
+        dish.setStatus(StatusConstant.ENABLE);
         dishMapper.insert(dish);
         // 获取insert语句生成的主键值dishId
         Long dishId = dish.getId();
@@ -63,6 +71,9 @@ public class DishServiceImpl implements DishService {
             });
             dishFlavorMapper.insertBatch(flavors);
         }
+        // 删除redis缓存
+        // redisTemplate.delete(PREFIX + dishDTO.getCategoryId());
+        cleanCache(PREFIX + dishDTO.getCategoryId());
     }
 
     /**
@@ -111,6 +122,8 @@ public class DishServiceImpl implements DishService {
         dishMapper.deleteByIds(ids);
         // 批量删除关联的口味数据
         dishFlavorMapper.deleteByDishIds(ids);
+        // 清理redis中所有的dish开头的缓存
+        cleanCache(PREFIX + "*");
     }
 
     /**
@@ -139,22 +152,24 @@ public class DishServiceImpl implements DishService {
     @Override
     @Transactional
     public void updateWithFlavor(DishDTO dishDTO) {
-       // 修改菜品基本信息
-       Dish dish = new Dish();
-       BeanUtils.copyProperties(dishDTO, dish);
-       dishMapper.update(dish);
-       // 删除原有的口味信息
-       dishFlavorMapper.deleteByDishId(dish.getId());
-       // 新增修改后的口味信息
-       List<DishFlavor> flavors = dishDTO.getFlavors();
-       if (flavors != null && !flavors.isEmpty()) {
+        // 修改菜品基本信息
+        Dish dish = new Dish();
+        BeanUtils.copyProperties(dishDTO, dish);
+        dishMapper.update(dish);
+        // 删除原有的口味信息
+        dishFlavorMapper.deleteByDishId(dish.getId());
+        // 新增修改后的口味信息
+        List<DishFlavor> flavors = dishDTO.getFlavors();
+        if (flavors != null && !flavors.isEmpty()) {
            // 前端提交过来的数据中，口味只有名称和值，
            // 而dishId需要后端在添加菜品之后获取并赋值给口味
            flavors.forEach(flavor -> {
                flavor.setDishId(dish.getId());
            });
            dishFlavorMapper.insertBatch(flavors);
-       }
+        }
+        // 清理所有的dish缓存
+        cleanCache(PREFIX + "*");
     }
 
 
@@ -177,6 +192,8 @@ public class DishServiceImpl implements DishService {
     @Override
     public void modifyStatus(Long id, Integer status) {
         dishMapper.update(Dish.builder().id(id).status(status).build());
+        // 清理缓存
+        cleanCache(PREFIX + "*");
     }
 
     /**
@@ -186,8 +203,16 @@ public class DishServiceImpl implements DishService {
      */
     @Override
     public List<DishVO> getAllByCategoryIdWithFlavorsOnSale(Long categoryId) {
+        // 先查询redis
+        String key = PREFIX + categoryId;
+        List<DishVO> dishVOList = (List<DishVO>) redisTemplate.opsForValue().get(key);
+        if (dishVOList != null && !dishVOList.isEmpty()){
+            // 从redis中获取到了
+            return dishVOList;
+        }
+        // redis中没有查询到, 查询数据库
         List<Dish> dishes = dishMapper.selectAllByCategoryIdOnSale(categoryId);
-        List<DishVO> dishVOList = new ArrayList<>();
+        dishVOList = new ArrayList<>();
         for (Dish dish : dishes) {
             DishVO dishVO = new DishVO();
             BeanUtils.copyProperties(dish, dishVO);
@@ -196,6 +221,20 @@ public class DishServiceImpl implements DishService {
             dishVO.setFlavors(dishFlavors);
             dishVOList.add(dishVO);
         }
+        // 将list存入redis中
+        redisTemplate.opsForValue().set(key, dishVOList);
         return dishVOList;
+    }
+
+
+    /**
+     * 根据指定的key的模式删除redis缓存
+     * @param pattern
+     */
+    private void cleanCache(String pattern){
+        Set<String> keys = redisTemplate.keys(pattern);
+        if (keys != null) {
+            redisTemplate.delete(keys);
+        }
     }
 }
