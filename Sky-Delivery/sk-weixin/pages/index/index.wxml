@@ -18,5 +18,15 @@
       昵称：{{nikeName}}
       <image style="width: 100px; height: 100px;" src="{{url}}"></image>
     </view>
+    
+    <view>
+      <button bind:tap="userLogin" type="warn">微信登录</button>
+      授权码：{{code}}
+    </view>
+
+    <view>
+      <!-- 发送异步请求 -->
+      <button bind:tap="sendRequest" type="default">发送请求</button>
+    </view>
   </view>
 </scroll-view>
