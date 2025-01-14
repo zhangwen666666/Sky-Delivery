@@ -60,4 +60,11 @@ public interface DishService {
      * @param status
      */
     void modifyStatus(Long id, Integer status);
+
+    /**
+     * 根据分类查询起售中的菜品（包含口味数据）
+     * @param categoryId
+     * @return
+     */
+    List<DishVO> getAllByCategoryIdWithFlavorsOnSale(Long categoryId);
 }

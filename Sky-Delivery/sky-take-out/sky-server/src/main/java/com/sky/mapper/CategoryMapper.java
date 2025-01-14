@@ -44,5 +44,10 @@ public interface CategoryMapper {
     @Delete("delete from category where id = #{id}")
     void deleteById(Long id);
 
+    /**
+     * 根据分类类型查询分类，如果type==null，则返回所有的分类（不包括停售状态的）
+     * @param type
+     * @return
+     */
     List<Category> list(Integer type);
 }
