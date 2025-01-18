@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,7 +24,7 @@ public class OrderController {
 
     @ApiOperation("用户下单")
     @PostMapping("/submit")
-    public Result<OrderSubmitVO> submit(OrdersSubmitDTO ordersSubmitDTO){
+    public Result<OrderSubmitVO> submit(@RequestBody OrdersSubmitDTO ordersSubmitDTO){
         log.info("用户下单，参数为：{}", ordersSubmitDTO);
         OrderSubmitVO orderSubmitVO = orderService.submitOrder(ordersSubmitDTO);
         return Result.success(orderSubmitVO);
