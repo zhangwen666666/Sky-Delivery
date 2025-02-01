@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sky.mapper.TransactionRecordMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into transaction_record(total, currency, out_trade_no, openid,
+                                       description, create_time, appid, mchid)
+        values(#{total}, #{currency}, #{outTradeNo}, #{openid}, #{description},
+               #{createTime}, #{appid}, #{mchid})
+    </insert>
+
+</mapper>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sky.mapper.PrepayOrderMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into prepay_order(total, currency, out_trade_no, openid, description,
+                                 notify_url, create_time, appid, mchid)
+        values(#{total}, #{currency}, #{outTradeNo}, #{openid}, #{description},
+               #{notifyUrl}, #{createTime}, #{appid}, #{mchid})
+    </insert>
+
+    <select id="selectById" resultType="com.sky.entity.PrepayOrder">
+        select * from prepay_order where id = #{id}
+    </select>
+
+</mapper>

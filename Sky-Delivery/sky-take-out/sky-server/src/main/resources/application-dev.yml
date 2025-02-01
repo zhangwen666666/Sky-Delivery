@@ -19,3 +19,5 @@ sky:
   wechat:
     appid: wxa62f5d584cd2c87b
     secret: beef45a1f514a21d8005ee37f883f8fb
+    mchid: zhang666
+    notifyUrl: http://111.119.211.126:9101/notify/paySuccess
