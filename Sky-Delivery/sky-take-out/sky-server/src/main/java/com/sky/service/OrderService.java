@@ -1,9 +1,12 @@
 package com.sky.service;
 
+import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
+import com.sky.dto.OrdersRejectionDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.result.PageResult;
 import com.sky.vo.OrderPaymentVO;
+import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
 
@@ -58,4 +61,33 @@ public interface OrderService {
      * @param id
      */
     void repetition(Long id);
+
+    /**
+     * 根据条件搜索订单
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    PageResult conditionSearch(OrdersPageQueryDTO ordersPageQueryDTO);
+
+
+    /**
+     * 统计各个状态的订单数量
+     * @return
+     */
+    OrderStatisticsVO statistics();
+
+    /**
+     * 接单 将订单id为id的订单的状态修改为已接单
+     * @param id
+     */
+    void confirm(Long id);
+
+
+    /**
+     * 拒单，将订单的状态修改为已取消，
+     * 只有待接单的订单可以拒单
+     * 如果用户完成了支付，需要退款
+     * @param ordersRejectionDTO
+     */
+    void rejection(OrdersRejectionDTO ordersRejectionDTO);
 }

@@ -7,6 +7,7 @@ import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
+import com.sky.dto.OrdersRejectionDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.*;
 import com.sky.exception.AddressBookBusinessException;
@@ -17,6 +18,7 @@ import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
+import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
 import org.springframework.beans.BeanUtils;
@@ -285,5 +287,84 @@ public class OrderServiceImpl implements OrderService {
 
         // 将购物车重新批量添加到数据库
         shoppingCartMapper.insertBatch(shoppingCartList);
+    }
+
+
+    /**
+     * 根据条件搜索订单
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    @Override
+    public PageResult conditionSearch(OrdersPageQueryDTO ordersPageQueryDTO) {
+        // 设置分页
+        PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
+
+        // 分页条件查询
+        Page<Orders> page = orderMapper.pageQuery(ordersPageQueryDTO);
+
+        // 封装分页查询结果集合
+        List<OrderVO> list = new ArrayList<>();
+
+        if (page != null && !page.isEmpty()){
+            for (Orders orders : page) {
+                // 封装结果集中的每一个数据
+                OrderVO orderVO = new OrderVO();
+                BeanUtils.copyProperties(orders, orderVO);
+                // 根据订单id查询订单明细
+                Long orderId = orders.getId();
+                List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orderId);
+                // 将每一条订单菜品信息拼接为字符串（格式：宫保鸡丁*3；）
+                List<String> collect = orderDetailList.stream().map(x -> x.getName() + "*" + x.getNumber() + ";").collect(Collectors.toList());
+                String orderDishes = String.join("", collect);
+                orderVO.setOrderDishes(orderDishes);
+                list.add(orderVO);
+            }
+        }
+        return new PageResult(page.getTotal(), list);
+    }
+
+
+    /**
+     * 统计各个状态的订单数量
+     * @return
+     */
+    @Override
+    public OrderStatisticsVO statistics() {
+        // 根据不同的状态查询数据库，得到每个状态的订单数量
+        Integer toBeConfirmed = orderMapper.countByStatus(Orders.TO_BE_CONFIRMED);
+        Integer confirmed = orderMapper.countByStatus(Orders.CONFIRMED);
+        Integer deliveryInProgress = orderMapper.countByStatus(Orders.DELIVERY_IN_PROGRESS);
+
+        // 封装返回结果
+        OrderStatisticsVO orderStatisticsVO = new OrderStatisticsVO();
+        orderStatisticsVO.setToBeConfirmed(toBeConfirmed);
+        orderStatisticsVO.setConfirmed(confirmed);
+        orderStatisticsVO.setDeliveryInProgress(deliveryInProgress);
+
+        return orderStatisticsVO;
+    }
+
+
+    /**
+     * 接单 将订单id为id的订单的状态修改为已接单
+     * @param id
+     */
+    @Override
+    public void confirm(Long id) {
+        Orders orders = Orders.builder().id(id).status(Orders.CONFIRMED).build();
+        orderMapper.update(orders);
+    }
+
+
+    /**
+     * 拒单，将订单的状态修改为已取消，
+     * 只有待接单的订单可以拒单
+     * 如果用户完成了支付，需要退款
+     * @param ordersRejectionDTO
+     */
+    @Override
+    public void rejection(OrdersRejectionDTO ordersRejectionDTO) {
+
     }
 }
