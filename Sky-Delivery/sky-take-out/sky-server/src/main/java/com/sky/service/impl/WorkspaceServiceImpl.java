@@ -36,21 +36,7 @@ public class WorkspaceServiceImpl implements WorkspaceService {
      * @return
      */
     @Override
-    public BusinessDataVO businessData() {
-        // 获得当天的开始时间
-        LocalDateTime begin = LocalDateTime.now().with(LocalTime.MIN);
-        // 获得当天的结束时间
-        LocalDateTime end = LocalDateTime.now().with(LocalTime.MAX);
-        return getBusinessDataByTime(begin, end);
-    }
-
-    /**
-     * 获取指定时间段内的运营数据
-     * @param begin
-     * @param end
-     * @return
-     */
-    private BusinessDataVO getBusinessDataByTime(LocalDateTime begin, LocalDateTime end) {
+    public BusinessDataVO businessData(LocalDateTime begin, LocalDateTime end) {
         Map<String, Object> map = new HashMap<>();
         map.put("begin", begin);
         map.put("end", end);
