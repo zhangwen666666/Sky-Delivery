@@ -203,7 +203,10 @@ public class ReportServiceImpl implements ReportService {
                 LocalDateTime.of(begin, LocalTime.MIN),
                 LocalDateTime.of(end, LocalTime.MAX));
         List<String> nameList = list.stream().map(GoodsSalesDTO::getName).toList();
-
-        return SalesTop10ReportVO.builder().build();
+        List<Integer> salesList = list.stream().map(GoodsSalesDTO::getNumber).toList();
+        return SalesTop10ReportVO.builder()
+                .nameList(StringUtils.join(nameList, ","))
+                .numberList(StringUtils.join(salesList, ","))
+                .build();
     }
 }
