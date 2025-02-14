@@ -37,7 +37,7 @@ export const enableOrDisableEmployee = (params: any) =>
   })
 
 
-// 新增
+// 新增员工
 export const addEmployee = (params: any) =>
   request({
     'url': '/employee',
@@ -45,4 +45,19 @@ export const addEmployee = (params: any) =>
     'data': params
   })
 
-  
+
+  // 根据id查询员工信息
+export const queryEmployeeById = (id: any) =>
+  request({
+    'url': `/employee/${id}`,
+    'method': 'GET',
+  })
+
+
+  // 修改员工
+export const updateEmployee = (params: any) =>
+  request({
+    'url': '/employee',
+    'method': 'PUT',
+    'data': params
+  })

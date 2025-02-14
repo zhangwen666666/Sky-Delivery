@@ -13,7 +13,7 @@
         </el-form-item>
         <el-form-item label="性别" prop="sex">
             <el-radio v-model="ruleForm.sex" label="1">男</el-radio>
-            <el-radio v-model="ruleForm.sex" label="2">女</el-radio>
+            <el-radio v-model="ruleForm.sex" label="0">女</el-radio>
         </el-form-item>
         <el-form-item label="身份证号" prop="idNumber">
           <el-input v-model="ruleForm.idNumber"></el-input>
@@ -33,11 +33,11 @@
 </template>
 
 <script lang="ts">
-import {addEmployee} from '@/api/employee'
+import {addEmployee, queryEmployeeById, updateEmployee} from '@/api/employee'
 export default {
   data() {
     return {
-      optType: 'add',
+      optType: '',
       ruleForm: {
         name: '',
         username: '',
@@ -80,12 +80,40 @@ export default {
     }
   },
 
+  created(){
+    // 获取路由参数id，如果有则为修改操作，否则为新增操作
+    this.optType = this.$route.query.id ? 'update' : 'add'
+    if(this.optType === 'update'){
+      // 修改操作，根据id查询员工信息，用于回显
+      queryEmployeeById(this.$route.query.id).then((res) => {
+        if(res.data.code === 1){
+          this.ruleForm = res.data.data
+        }
+      })
+    }
+  },
+
   methods: {
     submitForm(formName, isContinue){
       // 进行表单校验
       this.$refs[formName].validate((valid) => {
         if(valid){
           // alert('符合要求')
+          // 表单校验通过
+          if(this.optType === 'update'){
+            // 修改操作
+            updateEmployee(this.ruleForm).then(
+              (res) => {
+                if(res.data.code === 1){
+                  this.$message.success('员工信息修改成功!')
+                  this.$router.push('/employee')
+                } else {
+                  this.$message.error(res.data.msg)
+                }
+              }
+            )
+            return
+          }
           // 发送AJAX请求
           addEmployee(this.ruleForm).then((res) => {
             if (res.data.code === 1){
