@@ -33,9 +33,86 @@
 </template>
 
 <script lang="ts">
-
+import {addEmployee} from '@/api/employee'
 export default {
-  
+  data() {
+    return {
+      optType: 'add',
+      ruleForm: {
+        name: '',
+        username: '',
+        sex: '1',
+        phone: '',
+        idNumber: ''
+      },
+      rules: {
+        name: [
+          { required: true, message: '请输入员工姓名', trigger: 'blur' },
+        ],
+        username: [
+          { required: true, message: '请输入员工账号', trigger: 'blur' },
+        ],
+        phone: [
+          { required: true, trigger: 'blur', 
+            validator: (rule, value, callback) => {
+              // alert(value)
+              if(value === '' || (!/^1[3-9]\d{9}$/.test(value))){
+                callback(new Error('请输入正确的手机号!'))
+              } else {
+                callback()
+              }
+            } 
+          },
+        ],
+        idNumber: [
+          { required: true, trigger: 'blur', 
+            validator: (rule, value, callback) => {
+              // alert(value)
+              if(value === '' || (!/(^\d{15}$)|(^\d{17}[0-9Xx]$)/.test(value))){
+                callback(new Error('请输入正确的身份证号!'))
+              } else {
+                callback()
+              }
+            } 
+          },
+        ]
+      }
+    }
+  },
+
+  methods: {
+    submitForm(formName, isContinue){
+      // 进行表单校验
+      this.$refs[formName].validate((valid) => {
+        if(valid){
+          // alert('符合要求')
+          // 发送AJAX请求
+          addEmployee(this.ruleForm).then((res) => {
+            if (res.data.code === 1){
+              this.$message.success('员工添加成功')
+              // 保存并继续
+              if (isContinue){
+                this.ruleForm = {
+                  name: '',
+                  username: '',
+                  sex: '1',
+                  phone: '',
+                  idNumber: ''
+                }
+              }else{
+                // 路由跳转
+                this.$router.push('/employee')
+              }
+            } else {
+              this.$message.error(res.data.msg)
+            }
+          })
+        } else {
+          alert('校验失败')
+        }
+      })
+    }
+  }
 }
 </script>
 
